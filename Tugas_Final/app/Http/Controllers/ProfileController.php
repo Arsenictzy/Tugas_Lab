@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Password;
 
 class ProfileController extends Controller
 {
@@ -56,5 +58,26 @@ class ProfileController extends Controller
         $request->session()->regenerateToken();
 
         return Redirect::to('/');
+    }
+    
+    /**
+     * Update the user's password.
+     */
+    public function updatePassword(Request $request): RedirectResponse
+    {
+        // Validasi input
+        $validated = $request->validateWithBag('updatePassword', [
+            'current_password' => ['required', 'current_password'],
+            // Menggunakan aturan sandi Laravel
+            'password' => ['required', Password::defaults(), 'confirmed'], 
+        ]);
+
+        // Perbarui kata sandi pengguna
+        $request->user()->update([
+            'password' => Hash::make($validated['password']),
+        ]);
+
+        // Redirect dengan pesan sukses
+        return Redirect::route('profile.edit')->with('success', 'Kata sandi berhasil diperbarui!');
     }
 }
