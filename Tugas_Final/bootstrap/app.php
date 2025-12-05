@@ -10,9 +10,20 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
-    ->withMiddleware(function (Middleware $middleware): void {
-        //
+    ->withMiddleware(function (Middleware $middleware) {
+        // Mendefinisikan alias untuk Middleware kustom
+        $middleware->alias([
+            'admin' => \App\Http\Middleware\AdminMiddleware::class,
+            'hrd' => \App\Http\Middleware\HRDMiddleware::class,
+            'leader' => \App\Http\Middleware\LeaderMiddleware::class,
+            'user' => \App\Http\Middleware\UserMiddleware::class,
+        ]);
+        
+        // Perbaikan: Menghapus referensi ke HandleInertiaRequests karena menggunakan stack 'blade'
+        $middleware->web(append: [
+            // \App\Http\Middleware\HandleInertiaRequests::class Dihapus
+        ]);
     })
-    ->withExceptions(function (Exceptions $exceptions): void {
-        //
+    ->withExceptions(function (Exceptions $exceptions) {
+        // Konfigurasi penanganan pengecualian (Exceptions)
     })->create();
