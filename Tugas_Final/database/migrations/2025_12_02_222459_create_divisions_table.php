@@ -12,8 +12,8 @@ return new class extends Migration
             $table->id();
             $table->string('name')->unique();
             $table->text('description')->nullable();
-            $table->integer('leader_id')->nullable();
-            $table->date('established_date');
+            $table->foreignId('leader_id')->nullable()->constrained('users')->onDelete('set null');
+            $table->date('formed_date');
             $table->timestamps();
         });
     }
