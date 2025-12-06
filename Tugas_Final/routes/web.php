@@ -5,6 +5,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LeaveApplicationController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\DivisionController as AdminDivisionController;
+use App\Http\Controllers\Admin\ReportController as AdminReportController; // Tambahkan import ReportController
 use App\Http\Controllers\Leader\LeaveVerificationController;
 use App\Http\Controllers\HRD\FinalApprovalController;
 use Illuminate\Support\Facades\Route;
@@ -22,11 +23,9 @@ Route::middleware(['auth', 'user'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::patch('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
-    
-    // PERBAIKAN: Tambahkan rute DELETE untuk menghapus akun (profile.destroy)
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     
-    // Leave Applications
+    // Leave Applications (Standard User Access)
     Route::prefix('leave-applications')->name('leave-applications.')->group(function () {
         Route::get('/', [LeaveApplicationController::class, 'index'])->name('index');
         Route::get('/create', [LeaveApplicationController::class, 'create'])->name('create');
@@ -58,7 +57,8 @@ Route::middleware(['auth', 'user'])->group(function () {
     
     // Admin Routes
     Route::middleware('admin')->prefix('admin')->name('admin.')->group(function () {
-        // User Management
+        
+        // 1. User Management (Routes now have name prefix 'admin.users.')
         Route::prefix('users')->name('users.')->group(function () {
             Route::get('/', [AdminUserController::class, 'index'])->name('index');
             Route::get('/create', [AdminUserController::class, 'create'])->name('create');
@@ -68,7 +68,7 @@ Route::middleware(['auth', 'user'])->group(function () {
             Route::delete('/{user}', [AdminUserController::class, 'destroy'])->name('destroy');
         });
         
-        // Division Management
+        // 2. Division Management (Routes now have name prefix 'admin.divisions.')
         Route::prefix('divisions')->name('divisions.')->group(function () {
             Route::get('/', [AdminDivisionController::class, 'index'])->name('index');
             Route::get('/create', [AdminDivisionController::class, 'create'])->name('create');
@@ -79,6 +79,11 @@ Route::middleware(['auth', 'user'])->group(function () {
             Route::get('/{division}/members', [AdminDivisionController::class, 'members'])->name('members');
             Route::post('/{division}/members', [AdminDivisionController::class, 'addMember'])->name('members.add');
             Route::delete('/{division}/members/{user}', [AdminDivisionController::class, 'removeMember'])->name('members.remove');
+        });
+        
+        // 3. Reports (Laporan Global Cuti)
+        Route::prefix('reports')->name('reports.')->group(function () {
+            Route::get('/leave-applications', [AdminReportController::class, 'leaveReport'])->name('leave-report');
         });
     });
 });
